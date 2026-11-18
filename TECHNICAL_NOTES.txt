@@ -1,0 +1,203 @@
+CHOO-CHOO CHARLES v0.6.0 ALPHA - TECHNICAL NOTES
+================================================
+
+Scope and evidence
+------------------
+This is a performance-only update. The user confirmed that the v0.5 no-overheat
+feature worked and that the player survived an enemy shot. The native DLL,
+core.lua, noheat.lua and hud.lua are retained byte-for-byte. This release does
+not introduce new damage-route protection or alter game difficulty/graphics.
+
+Latest archive:
+UPLOAD_THIS_ChooChooCharles_ModTest_20261118_113215_13bbaf.zip
+The status log spans 478 seconds (17:24:04-17:32:02 UTC on November 18, 2026).
+  Status:       149 lines,  13,823 bytes
+  Events:     2,393 lines, 270,996 bytes
+  Reflection: 5,046 lines, 989,223 bytes
+Four automatic full snapshots produced 568/1490/1496/1492 reflection lines.
+No F9 key presses were recorded. The last two dumps occurred during damage
+activity. There were no matching loop/guard/no-heat errors in the collected
+logs. The report contains no frame-time/FPS measurement, so the exact share of
+stutter attributable to each path and any FPS uplift cannot be quantified.
+
+The latest heat snapshot reports one discovery, 22,930 checks, 258 positive
+heat clears, zero jam events and ready=true. Player damage samples report
+NightmareMode=true with the custom guard armed and ready. These observations
+support preserving the working heat and NPC mechanisms while reducing overhead.
+
+Game binary SHA256:
+DF538D829AF67D63C102DE968235C064305E9BCC36F4B17124A9C16706AEE1E5
+Observed runtime: UE4SS 4.0.0, git30afe5ff, MSVC shipping Win64; Unreal 4.26.
+Unchanged native helper SHA256:
+9fa67469e9b081429f767e32ddffc7e5f312fd006a68374f756ccbf2cb6788c0
+Unchanged core.lua SHA256:
+1cb2ce0c58d4a363f9b9251f2acde75569fd2cb4f6e3b847a6e1fcf9d2e2e71b
+
+Identified overhead and changes
+-------------------------------
+1. Player guard lifecycle
+   v0.5 called native enable and check during every nominal 50 ms maintenance
+   step. Each native call resolves engine objects, validates memory/schema and
+   checks patch ownership. This was repeated even while the guard was armed.
+   v0.6 keeps the sticky in-memory guard continuously installed, performs full
+   activation/readback when needed, and uses routine ownership checks once per
+   20 maintenance calls (nominally one second). Activation, rebind, disable and
+   failure paths retain explicit handling; restoration remains retryable.
+   This is a change to validation scheduling, not intermittent damage immunity.
+
+2. Object lookups and identities
+   The prior scan searched for the Engine and enumerated PlayerControllers
+   every 500 ms. The updated path reuses validated retained objects and checks
+   the active viewport/world before deciding whether rediscovery is needed.
+   Identity strings are cached within a maintenance pass. With all modes ON,
+   core.refresh asks for Charles's identity six times; the old implementation
+   rebuilt the full name every time (120 calls/second on its 50 ms schedule).
+   The protection core itself is unchanged.
+
+3. Cooling and combat callbacks
+   The dedicated 16 ms heat timer remains. The main 50 ms loop no longer repeats
+   the same cooling work while that timer is available; it remains the fallback.
+   Instant native damage hooks and core.refresh in Blueprint damage callbacks
+   are preserved. Heavy observations, HUD work and detailed diagnostics are
+   deferred out of those callbacks. The main protection cadence stays 50 ms.
+
+4. Logging and snapshots
+   The old logger opened/wrote/closed a file for every emitted line, including
+   about 1,500 lines in a single automatic reflection snapshot. The new logger
+   batches game-thread writes on the maintenance cadence (nominally one second)
+   and flushes after an explicit F9 capture. Routine automatic records use
+   compact telemetry. Full reflection runs only on F9. A manual detailed capture
+   can still briefly hitch; test ordinary frame pacing without repeated F9.
+   Periodic compact records include operation counts for scans, global searches,
+   identity-cache hits, guard calls, heat checks and log writes. These counters
+   describe the mod's workload; they are explicitly not an FPS measurement.
+
+These are verified code-path changes, not a live frame-time benchmark. The
+unchanged native patch and existing heat maintenance retain their prior timing
+semantics once installed; the expensive housekeeping is what has been reduced.
+
+Observed train-health warning
+-----------------------------
+At 17:31:53 UTC the latest report records a train-health decrease while F7 was
+ON: 55.807529449463 -> 47.255317687988, followed by additional decreases in the
+same second. The warning remains recorded and can make F7 show NOT READY.
+This performance release does not redesign train protection or claim that this
+damage route was fixed. The user's current request is to preserve the working
+features and address frame pacing. Do not treat an ON label alone as proof that
+every possible damage path is covered.
+
+Retained v0.5 mechanisms
+------------------------
+The earlier v0.4 report supplied the exact Jamming field schema and identified
+the cave NPC's custom Damage entry. The implementations below are retained.
+
+Exact no-heat correction
+------------------------
+noheat.lua requires the actual PlayerTrain class path and all six exact typed
+counter/latch fields. All reads/writes use their raw reflected names. Finite
+negative cooling values are accepted. Counters are cleared to0, verified, then
+paired jam flags are cleared false and verified. Failed preflight or readback
+keeps readiness false and identifies the failing field. Thresholds remain
+read-only. Fire controls, fire rate, damage, health, audio and materials are not
+used as substitutes for heat state. OFF stops cooling without restoring stale
+heat. No unverified Rocket fields/functions are invoked.
+
+Custom player Damage prevention
+-------------------------------
+The observed entry is:
+/Game/NaturalMovementV3/Blueprint/Character/BP_NMCharacter.BP_NMCharacter_C:Damage
+Its three reflected parameters are Damage Applied(float), Slowing Multiplier
+(float), Hit Component(object). The function returns void and is non-native.
+UE4SS Lua RegisterHook runs AFTER Blueprint functions; changing its input there
+would not reliably prevent a lethal branch already executed.
+
+playerguard.lua therefore loads Scripts/native/ccc_guard.dll. The companion
+resolves the exact function and owner using exported UE4SS accessors, validates
+its class, non-native flags, three-parameter/void signature, script-array bounds,
+read/write memory accessibility and the normal void-return/end-of-script tail.
+The Lua layer independently validates the raw field names and types. Activation
+is gated to the UE4SS4.0.0 / Unreal4.26 ABI observed in this report.
+
+The companion replaces only the first two live script bytes with EX_Return,
+EX_Nothing (04,0B). It also clears this function's optional EventGraphFunction
+shortcut so that an optimized dispatch cannot bypass the entry guard. It never
+changes the shared ExecuteUbergraph body, its entry offset, array size/capacity,
+function flags, caller arguments, health, save data, or on-disk game assets.
+
+The exported GetScript accessor supplies the actual TArray, avoiding guessed
+UFunction offsets. The official UE4SS4.0.0 PDB independently confirms the
+Win64 TArray<unsigned char,TSizedDefaultAllocator<32>> layout: size16, data
+pointer@0, Num@8, Max@12. The companion uses pointer/scalar C ABI calls only;
+there is no MSVC std::function/STL or private Lua-state layout dependency.
+All accessor export spellings are in NativeSource/ccc_guard_win.c.
+
+Activation/readback/restoration execute on the game thread; the companion
+checks UE4SS IsInGameThread and thread consistency. Timer/key/BeginPlay safe
+points maintain the guard. Damage POST observes state but never changes the
+entry guard inside the function currently being observed.
+
+Original entry bytes and the original fastcall link are retained. F6 OFF
+restores them only while function/buffer identity, unchanged script suffix and
+entry offset establish ownership. Conflicting changes are reported, not
+silently overwritten. An interrupted operation retains cleanup intent and an
+owned transaction record for restoration. Failed restoration remains visible as
+OFF (RESTORING). Stale class memory is never accessed through saved pointers.
+Full game restart is required for updates; hot reload is unsupported.
+
+This guard affects this player-character function and classes inheriting it.
+It does not change Charles's separate Damage function or the locomotive's
+Damage Train function. It blocks calls entering the observed player Damage
+function, including the recorded cave route, independently of difficulty.
+A separately scripted death or direct jump into another graph would need its
+own evidence; this release does not claim proof against every possible kill.
+
+The DLL is an included original companion, not a replacement UE4SS binary. It
+uses only Windows system imports and installed UE4SS exports. It performs no
+networking, process injection, external-process access or persistent game-file
+writes. Complete source and a reproducible developer build script are included.
+Its private Lua bridge returns only a count of existing sentinel arguments;
+the real Lua5.4 C callback fixture verifies this behavior without linking a
+second Lua implementation. This bridge is internal to playerguard.lua.
+
+Readiness and installation
+--------------------------
+F6 readiness requires the established source/native protections and a verified
+custom Damage guard. Failed enable/restoration keeps cleanup intent and visible
+status. F7/F8/F10 remain independent. The HUD stays top right; F11 hides/shows it.
+The existing player health observer remains supplemental, not the mechanism
+establishing protection from the cave NPC. No difficulty flag is modified.
+
+The package now requires seven Lua modules, including logger.lua, plus the
+existing native DLL. Installer preflight checks every required file before
+creating backups. The staged copy is hash-compared before replacing the old
+mod. Existing rollback, local save/mod backups and UE4SS reuse are retained.
+The collector records installed main/native hashes and diagnostic logs without
+uploading saves, game assets or binary bytes. The included logger is installed
+by the same complete-package process; do not copy only main.lua.
+
+Manual reflection retains the read-only v0.5 schema traversal, Easy Save Ref ->
+svrSubClass bridge, relevant typed maps and explicit caps/unsupported markers.
+No save API is invoked to change health or save data. The native iterator
+nil-continuation behavior is retained.
+
+Verification limits
+-------------------
+See VALIDATION_RESULTS.txt and Verification/ outputs for final results. Local
+regressions use simulated engine boundaries plus the actual portable native
+patch core, Lua C bridge and real installer scripts in temporary fake game
+folders. They do not run Choo-Choo Charles or benchmark a Windows frame rate.
+The unchanged v0.5 DLL/heat behavior has now been confirmed by the user's live
+run; the v0.6 scheduling and performance changes still need that live check.
+
+Primary source references
+-------------------------
+https://docs.ue4ss.com/lua-api/global-functions/findallof.html
+https://docs.ue4ss.com/lua-api/global-functions/delayedactions.html
+https://docs.ue4ss.com/lua-api/global-functions/registerhook.html
+https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v4.0.0
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/Mod/LuaMod.cpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/LuaType/LuaUStruct.cpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/LuaType/LuaTMap.cpp
+https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/CoreUObject/EExprToken?application_version=5.8
+https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/CoreUObject/UFunction
+https://www.lua.org/manual/5.4/manual.html#lua_CFunction

@@ -1,0 +1,81 @@
+CHOO-CHOO CHARLES v0.6.0 ALPHA - LOCAL VALIDATION
+================================================
+
+PERFORMANCE REGRESSIONS
+----------------------
+PASS: 1,200 consecutive simulated 50 ms maintenance callbacks after initial
+  gameplay binding (60 nominal seconds) execute 60 native ownership checks,
+  zero native enable calls, zero global actor/controller searches, and zero
+  full automatic reflection snapshots. The guard remains armed and ready.
+PASS: core's six Charles field patches share at most one Charles full-name
+  read per maintenance pass. The address-plus-path ownership identity remains
+  unchanged; caches are replaced for each maintenance/discovery pass.
+PASS: the dedicated 16 ms heat loop still clears exact counters and jam latches.
+  The 50 ms loop does not duplicate it during stable play; newly bound trains
+  get immediate cooling and the 50 ms fallback remains available.
+PASS: damage callbacks retain core protection but do not invoke native entry
+  mutation, deep reflection, HUD work or routine file I/O inline.
+PASS: changing the viewport world bypasses the retained controller, rejects
+  previous-world actors, restores the guard when no player is present and
+  reactivates protection/cooling when gameplay returns.
+PASS: the logger batches 1,000 ordered records into one file write batch, with
+  no write-file opens before flush. Binary append keeps Windows byte caps
+  independent of text-mode newline expansion.
+
+These are measured call counts at simulated engine boundaries, not game FPS
+measurements. No claim of a specific FPS increase is made.
+
+REGRESSION / PACKAGE CHECKS
+--------------------------
+PASS: all seven production Lua modules compile with actual Lua 5.4.
+PASS: all nine Lua regression files execute successfully.
+  Core: 38 assertions plus independent damage/restoration audit.
+  Native guard core: 649 assertions against actual portable production C code.
+  Real Lua C result-count bridge: all counts 0 through 16 with existing args.
+  Main integration: 72 assertions, including the performance budgets above,
+    existing keys, independent modes, readiness failures and OFF restoration.
+  No Overheat: 85 exact-schema, readback and isolation assertions.
+  PlayerGuard: 81 assertions, including cached cadence, immediate OFF/ON,
+    explicit validation, changed/reused identities and verification recovery.
+  Logger: 1,118 assertions for batching, order, rotation, memory/file caps,
+    open/write/close errors, bounded retries and explicit rejected-line counts.
+  Diagnostics: real native iterator boundary, large field sets, save-reference
+    priority, bounded read-only TMaps and preserved zero/false values.
+  HUD: unchanged top-right geometry, labels, hidden state and context cleanup.
+
+PASS: actual PowerShell 7.4.7 parser and 111 helper assertions.
+PASS: 84 actual install/collect/uninstall/rollback smoke assertions using
+  temporary fake game trees, for both existing UE4SS folder layouts.
+PASS: 35 payload completeness/corruption assertions, including missing logger,
+  missing native companion and staged SHA256 mismatch refusal.
+PASS: static installer/collector/CMD scope, encoding and rollback checks.
+PASS: core.lua, noheat.lua, hud.lua, ccc_guard.dll and all NativeSource files
+  remain byte-identical to the delivered v0.5 package. The core also matches
+  the earlier user-confirmed Classic baseline.
+PASS: required payload, complete SHA256 manifest and archive CRC verified
+  during final packaging. Only this mod's native DLL is bundled; no UE4SS DLL,
+  game asset, save, compiler, user diagnostic archive or test binary is bundled.
+
+The unchanged Windows x64 DLL was built and inspected for v0.5. The retained
+build record is in Verification/native_binary_validation.txt; its SHA256 is
+9fa67469e9b081429f767e32ddffc7e5f312fd006a68374f756ccbf2cb6788c0.
+NativeSource/BUILD_INFO.txt and all original native source are included.
+Lua_Test_Output.txt is a SIMULATED local test log, not a live-game report.
+Historical v0.3 files are explicitly marked BASELINE in their filenames.
+
+LIMITS / USER CONFIRMATION
+-------------------------
+The user confirmed v0.5 No Overheat and survival after an enemy shot. Their
+latest supplied report records NightmareMode=true during player damage events.
+The earlier Classic baseline was also user-confirmed. v0.6 preserves these
+mechanisms while changing housekeeping and diagnostic work.
+
+This environment does not run Choo-Choo Charles or Windows. Engine/native DLL
+boundaries are mocked in Lua tests; the actual portable native core and Lua C
+bridge are tested separately. PowerShell tests exercise real scripts on Linux,
+using temporary fake installations and fixture-only process/backup overrides.
+The v0.6 update still needs a live frame-pacing check on the user's PC.
+The report contained no frame timings, so exact causal shares are not known.
+
+A train-health decrease with F7 ON remains documented in TECHNICAL_NOTES.txt.
+This performance update does not expand the set of train-damage paths covered.

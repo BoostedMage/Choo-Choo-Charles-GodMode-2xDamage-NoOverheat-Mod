@@ -1,0 +1,31 @@
+# Local diagnostics, saves and backups
+UPLOAD_THIS_*.zip
+*.log
+logs/
+Logs/
+Saved/
+SaveGames/
+backups/
+Backups/
+*.sav
+*.bak
+*.tmp
+
+# Generated development outputs and local configuration
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.o
+*.obj
+*.exe
+*.pdb
+*.zip
+# The required original ccc_guard.dll is deliberately tracked.
