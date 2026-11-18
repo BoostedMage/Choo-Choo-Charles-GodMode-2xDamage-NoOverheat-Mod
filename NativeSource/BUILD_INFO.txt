@@ -1,0 +1,13 @@
+CHOO-CHOO CHARLES0.5.0 NATIVE BUILD
+Compiler: Zig0.13.0 C compiler, target x86_64-windows-gnu
+See build_guard.py for exact command. Only ccc_guard.dll is installed.
+
+PASS Windows x64 PE32+ DLL structure
+PASS exact three private Lua callback exports
+PASS Windows system imports only; no second Lua or UE4SS DLL bundled
+PASS all 10 requested accessor/thread exports found in official UE4SS4.0.0 DLL
+PASS companion built from final bundled source with Zig0.13.0, -O2, warnings as errors
+SHA256 9fa67469e9b081429f767e32ddffc7e5f312fd006a68374f756ccbf2cb6788c0
+Bytes 23552
+Imports KERNEL32.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll
+SCOPE: compilation and static PE/export inspection, not Windows or game loading.
