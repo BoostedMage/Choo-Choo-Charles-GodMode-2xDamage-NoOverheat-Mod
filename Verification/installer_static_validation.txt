@@ -1,0 +1,10 @@
+PASS balanced strings/delimiters and ASCII source: CCC.Tools.ps1
+PASS balanced strings/delimiters and ASCII source: COLLECT_Mod_Test.ps1
+PASS balanced strings/delimiters and ASCII source: INSTALL_God_Mode.ps1
+PASS balanced strings/delimiters and ASCII source: UNINSTALL_Mod.ps1
+PASS exact mods.txt entry regex and text assembly: 13 fixtures, install/uninstall/idempotence
+PASS encoding fixtures: UTF-8 with/without BOM, UTF-16 LE/BE, UTF-32 LE/BE
+PASS installer scope/rollback static checks: no downloader, stage outside Mods, no broad root removal, no pipeline-array concatenation
+PASS collector static bounds/isolation checks: complete bounded snapshots, explicit omissions, mod-only log/text traversal, raw UE4SS source outside archive
+PASS CMD launchers: CRLF, matching scripts, argument forwarding, exit-code propagation
+SCOPE: Static validation and regex/encoding fixtures only. Separate PowerShell runtime and smoke results are in the accompanying validation files; no Windows/game execution was tested.

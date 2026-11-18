@@ -1,0 +1,348 @@
+Choo-Choo Charles v0.6.0 local Lua regression checks; engine/native DLL boundaries mocked where stated. Not in-game FPS measurement.
+PASS core: 38 checks; actual field fixtures, restoration, death limit, phase resets
+independent core damage semantics passed
+diagnostics regressions passed: native v4 nil iterators; primary fields/schemas; save bridge priority; bounded read-only TMaps; native-noise filtering; native arrays; cold observations
+PASS native guard core: 649 assertions; reversible entry/fastcall guard, ownership, retired pointers, NPC execution-order model
+PASS real Lua C bridge: status counts0..16 returned from existing sentinel arguments; no linked Lua C API
+HUD tests PASS: top-right anchors/alignment/pivot at three viewport sizes; exact labels; F10 OFF/readiness; plain keys; F11 hide/show; map/controller cleanup; failure recovery.
+LOGGER PASS: 1118 assertions; batched I/O, bounded memory/file caps, rotation, retry and explicit loss reporting
+[CCC-GODMOD] SESSION START Choo-Choo Charles 0.6.0-alpha
+
+[CCC-GODMOD] F6 God Mode | F7 Train God Mode | F8 Double Damage | F9 Snapshot | F10 No Overheat | F11 Hide/show HUD. No Ctrl modifier.
+
+[CCC-GODMOD] v0.6 performance update: retained guard, cached discovery, compact automatic diagnostics and batched log writes.
+
+[CCC-GODMOD] v0.5 No Overheat and NPC protection were user-confirmed. This build preserves those gameplay mechanisms.
+
+[CCC-GODMOD] Player readiness requires the custom Damage entry guard as well as the existing source protections.
+
+[CCC-GODMOD] NATIVE PRE GUARD installed /Script/Engine.GameplayStatics:ApplyDamage
+
+[CCC-GODMOD] NATIVE PRE GUARD installed /Script/Engine.GameplayStatics:ApplyPointDamage
+
+[CCC-GODMOD] BIND player=103|BP_NMCharacter_Player_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.Player
+
+[CCC-GODMOD] BIND train=104|PlayerTrain_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.PlayerTrain_4
+
+[CCC-GODMOD] BIND charles=105|CharlesCharacter_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.CharlesCharacter_2
+
+[CCC-GODMOD] NOHEAT NO HEAT WAITING FOR REFLECTED HEAT STATE
+
+[CCC-GODMOD] ACTOR player BP_NMCharacter_Player_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.Player
+
+[CCC-GODMOD] ACTOR train PlayerTrain_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.PlayerTrain_4
+
+[CCC-GODMOD] ACTOR charles CharlesCharacter_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.CharlesCharacter_2
+
+[CCC-GODMOD] PLAYERGUARD READY; custom player Damage body blocked before execution
+
+[CCC-GODMOD] APPLIED player.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED player Damage to Player: 25 -> 0
+
+[CCC-GODMOD] APPLIED player Damage to Player on Train: 20 -> 0
+
+[CCC-GODMOD] APPLIED train.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED train Damage to Train: 15 -> 0
+
+[CCC-GODMOD] APPLIED double Face Damage Multiplier: 2 -> 4
+
+[CCC-GODMOD] APPLIED double Body Damage Multiplier: 1 -> 2
+
+[CCC-GODMOD] APPLIED double Legs Damage Multiplier: 0.5 -> 1.0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=15 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=38.5 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jammed" type=BoolProperty role=latch prevalue=true
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jamming" type=FloatProperty role=counter prevalue=7.5841679573059
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=10.8000001907 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Flamethrower Jamming" type=FloatProperty scope=flamethrower prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Machine Gun Jamming" type=FloatProperty scope=machinegun prevalue=7.5841679573059
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Range Gun Jamming" type=FloatProperty scope=rangegun prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Flamethrower Jammed" type=BoolProperty scope=flamethrower prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Machine Gun Jammed" type=BoolProperty scope=machinegun prevalue=true
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Range Gun Jammed" type=BoolProperty scope=rangegun prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT ON: verified PlayerTrain jamming counters=3, latches=3
+
+[CCC-GODMOD] POST OBSERVER installed /Game/NaturalMovementV3/Blueprint/Character/BP_NMCharacter.BP_NMCharacter_C:Damage
+
+[CCC-GODMOD] POST OBSERVER installed /Game/NaturalMovementV3/Blueprint/Character/BP_NMCharacter.BP_NMCharacter_C:ReceiveAnyDamage
+
+[CCC-GODMOD] POST OBSERVER installed /Game/_GAME/Blueprints/TrainBlueprints/PlayerTrain.PlayerTrain_C:Damage Train
+
+[CCC-GODMOD] POST OBSERVER installed /Game/_GAME/Blueprints/TrainBlueprints/CharlesCharacter.CharlesCharacter_C:Damage
+
+[CCC-GODMOD] STATUS player=ON/ready=true train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+PERFORMANCE CALL BUDGET:1200 maintenance callbacks;60 native checks,0 native reinstalls,0 global searches,0 full automatic dumps
+[CCC-GODMOD] KEY F6
+
+[CCC-GODMOD] RESTORED Damage to Player=25
+
+[CCC-GODMOD] RESTORED Damage to Player on Train=20
+
+[CCC-GODMOD] TOGGLE player=OFF
+
+[CCC-GODMOD] PLAYERGUARD OFF; original player Damage restored
+
+[CCC-GODMOD] KEY F7
+
+[CCC-GODMOD] RESTORED Damage to Train=15
+
+[CCC-GODMOD] TOGGLE train=OFF
+
+[CCC-GODMOD] KEY F8
+
+[CCC-GODMOD] RESTORED Legs Damage Multiplier=0.5
+
+[CCC-GODMOD] RESTORED Body Damage Multiplier=1
+
+[CCC-GODMOD] RESTORED Face Damage Multiplier=2
+
+[CCC-GODMOD] TOGGLE double=OFF
+
+[CCC-GODMOD] KEY F11
+
+[CCC-GODMOD] HUD visible=false
+
+[CCC-GODMOD] KEY F9
+
+[CCC-GODMOD] SNAPSHOT F9-1 mock-1
+
+[CCC-GODMOD] KEY F11
+
+[CCC-GODMOD] HUD visible=true
+
+[CCC-GODMOD] KEY F10
+
+[CCC-GODMOD] NOHEAT NO HEAT OFF
+
+[CCC-GODMOD] KEY F10
+
+[CCC-GODMOD] NOHEAT NO HEAT WAITING FOR REFLECTED HEAT STATE
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=15 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=38.5 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jamming" type=FloatProperty role=counter prevalue=11.0009851456
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=10.8000001907 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Flamethrower Jamming" type=FloatProperty scope=flamethrower prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Machine Gun Jamming" type=FloatProperty scope=machinegun prevalue=11.0009851456
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Range Gun Jamming" type=FloatProperty scope=rangegun prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Flamethrower Jammed" type=BoolProperty scope=flamethrower prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Machine Gun Jammed" type=BoolProperty scope=machinegun prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Range Gun Jammed" type=BoolProperty scope=rangegun prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT ON: verified PlayerTrain jamming counters=3, latches=3
+
+[CCC-GODMOD] KEY F6
+
+[CCC-GODMOD] TOGGLE player=ON
+
+[CCC-GODMOD] APPLIED player.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED player Damage to Player: 25 -> 0
+
+[CCC-GODMOD] APPLIED player Damage to Player on Train: 20 -> 0
+
+[CCC-GODMOD] PLAYERGUARD READY; custom player Damage body blocked before execution
+
+[CCC-GODMOD] KEY F7
+
+[CCC-GODMOD] TOGGLE train=ON
+
+[CCC-GODMOD] APPLIED train.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED train Damage to Train: 15 -> 0
+
+[CCC-GODMOD] KEY F8
+
+[CCC-GODMOD] TOGGLE double=ON
+
+[CCC-GODMOD] APPLIED double Face Damage Multiplier: 2 -> 4
+
+[CCC-GODMOD] APPLIED double Body Damage Multiplier: 1 -> 2
+
+[CCC-GODMOD] APPLIED double Legs Damage Multiplier: 0.5 -> 1.0
+
+[CCC-GODMOD] PLAYERGUARD NOT READY: guard readback was not active
+
+[CCC-GODMOD] STATUS player=ON/ready=false train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+[CCC-GODMOD] KEY F9
+
+[CCC-GODMOD] SNAPSHOT F9-2 mock-2
+
+[CCC-GODMOD] PLAYERGUARD READY; custom player Damage body blocked before execution
+
+[CCC-GODMOD] STATUS player=ON/ready=true train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+[CCC-GODMOD] KEY F6
+
+[CCC-GODMOD] RESTORED Damage to Player=25
+
+[CCC-GODMOD] RESTORED Damage to Player on Train=20
+
+[CCC-GODMOD] TOGGLE player=OFF
+
+[CCC-GODMOD] PLAYERGUARD OFF (RESTORING): another change conflicts with the owned guard
+
+[CCC-GODMOD] PLAYERGUARD OFF; original player Damage restored
+
+[CCC-GODMOD] STATUS player=OFF/ready=false train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+[CCC-GODMOD] KEY F6
+
+[CCC-GODMOD] TOGGLE player=ON
+
+[CCC-GODMOD] APPLIED player.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED player Damage to Player: 25 -> 0
+
+[CCC-GODMOD] APPLIED player Damage to Player on Train: 20 -> 0
+
+[CCC-GODMOD] PLAYERGUARD READY; custom player Damage body blocked before execution
+
+[CCC-GODMOD] STATUS player=ON/ready=true train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+[CCC-GODMOD] BIND player=none
+
+[CCC-GODMOD] BIND train=none
+
+[CCC-GODMOD] RESTORED Body Damage Multiplier=1
+
+[CCC-GODMOD] RESTORED Legs Damage Multiplier=0.5
+
+[CCC-GODMOD] RESTORED Damage to Player=25
+
+[CCC-GODMOD] RESTORED Damage to Train=15
+
+[CCC-GODMOD] RESTORED Damage to Player on Train=20
+
+[CCC-GODMOD] RESTORED Face Damage Multiplier=2
+
+[CCC-GODMOD] BIND charles=none
+
+[CCC-GODMOD] NOHEAT NO HEAT WAITING FOR TRAIN
+
+[CCC-GODMOD] PLAYERGUARD waiting for gameplay player
+
+[CCC-GODMOD] STATUS player=ON/ready=false train=ON/ready=false double=ON/ready=false noheat=ON/ready=false
+
+[CCC-GODMOD] BIND player=103|BP_NMCharacter_Player_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.Player
+
+[CCC-GODMOD] BIND train=104|PlayerTrain_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.PlayerTrain_4
+
+[CCC-GODMOD] BIND charles=105|CharlesCharacter_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.CharlesCharacter_2
+
+[CCC-GODMOD] NOHEAT NO HEAT WAITING FOR REFLECTED HEAT STATE
+
+[CCC-GODMOD] ACTOR player BP_NMCharacter_Player_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.Player
+
+[CCC-GODMOD] ACTOR train PlayerTrain_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.PlayerTrain_4
+
+[CCC-GODMOD] ACTOR charles CharlesCharacter_C /Game/Island_a_Landscape/Maps/Photorealistic_Island.Photorealistic_Island:PersistentLevel.CharlesCharacter_2
+
+[CCC-GODMOD] PLAYERGUARD READY; custom player Damage body blocked before execution
+
+[CCC-GODMOD] APPLIED player.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED player Damage to Player: 25 -> 0
+
+[CCC-GODMOD] APPLIED player Damage to Player on Train: 20 -> 0
+
+[CCC-GODMOD] APPLIED train.bCanBeDamaged=false
+
+[CCC-GODMOD] APPLIED train Damage to Train: 15 -> 0
+
+[CCC-GODMOD] APPLIED double Face Damage Multiplier: 2 -> 4
+
+[CCC-GODMOD] APPLIED double Body Damage Multiplier: 1 -> 2
+
+[CCC-GODMOD] APPLIED double Legs Damage Multiplier: 0.5 -> 1.0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=15 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Flamethrower Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=38.5 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Machine Gun Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jam THRESHHOLD" type=FloatProperty role=threshold prevalue=10.8000001907 reason=read-only jamming threshold
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jammed" type=BoolProperty role=latch prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT CANDIDATE "Range Gun Jamming" type=FloatProperty role=counter prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Flamethrower Jamming" type=FloatProperty scope=flamethrower prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Machine Gun Jamming" type=FloatProperty scope=machinegun prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND counter "Range Gun Jamming" type=FloatProperty scope=rangegun prevalue=0
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Flamethrower Jammed" type=BoolProperty scope=flamethrower prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Machine Gun Jammed" type=BoolProperty scope=machinegun prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT BOUND latch "Range Gun Jammed" type=BoolProperty scope=rangegun prevalue=false
+
+[CCC-GODMOD] NOHEAT NO HEAT ON: verified PlayerTrain jamming counters=3, latches=3
+
+[CCC-GODMOD] STATUS player=ON/ready=true train=ON/ready=true double=ON/ready=true noheat=ON/ready=true
+
+[CCC-GODMOD] KEY F7
+
+[CCC-GODMOD] RESTORED Damage to Train=15
+
+[CCC-GODMOD] TOGGLE train=OFF
+
+[CCC-GODMOD] PROTECTION GAP player death/zero health observed; no resurrection attempted
+
+[CCC-GODMOD] STATUS player=ON/ready=false train=OFF/ready=false double=ON/ready=true noheat=ON/ready=true
+
+PASS main: 72 checks; performance call budgets, map travel, protection/heat timing, native guard restoration, HUD and damage parameters
+PASS noheat: 85 exact-schema/readback/isolation checks; game execution still requires a live run
+PASS playerguard: 81 Lua schema/ABI/readiness/restoration checks; native execution is not mocked as proven

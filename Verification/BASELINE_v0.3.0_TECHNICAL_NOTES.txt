@@ -1,0 +1,132 @@
+CHOO-CHOO CHARLES v0.3.0 ALPHA - ENGINEERING RECORD
+================================================
+
+Evidence examined
+-----------------
+User diagnostic archive:
+  UPLOAD_THIS_ChooChooCharles_ModTest_20261118_085320.zip
+Its CCC_Mod_Status_LAST400.txt, CCC_Reflection_LAST1800.txt and filtered UE4SS
+log were inspected. The prior v0.2.0 package and BlueprintProbe archive were
+also inspected. No game binary or running UE4SS process was available here.
+
+Build fingerprint from the supplied project reports:
+Steam app 1766740, installed build 22844442, project Obscure.
+Shipping binary SHA256:
+DF538D829AF67D63C102DE968235C064305E9BCC36F4B17124A9C16706AEE1E5
+
+Confirmed old defects
+---------------------
+1. The status log registered Ctrl+F6/F7/F8/F9/F10. The requested plain F6 did
+   not invoke those handlers. No manual key-toggle or snapshot entries appeared.
+2. Live player varHealthMain is FloatProperty=100; varHealth is FloatProperty=0.
+3. Charles has direct spaced properties: Damage to Player=25, Damage to Train=15,
+   Damage to Player on Train=20. The prior nested Stats guesses did not bind.
+4. Face/Body/Legs Damage Multiplier are 2, 1, 0.5 in that live Charles instance.
+5. PlayerTrain's own property list was stopped at 250 entries. It was not a
+   complete enumeration and cannot establish that health fields are absent.
+6. The old collector's `relevant and read(...) or nil` discarded false values.
+7. Native damageability was successfully disabled in v0.2.0, yet the user still
+   took damage/died. That flag is insufficient for the custom Blueprint routes.
+8. NightmareMode=true was observed on both the live player and Charles.
+
+Report references (one-based lines within CCC_Reflection_LAST1800.txt):
+  player varHealthMain 569; unused varHealth 575; Dead? 604; NightmareMode 650;
+  player Damage function 651; train cutoff 1045; Damage Train function 1046;
+  multipliers 1223-1225; incoming sources 1237-1239; NightmareMode 1315;
+  Charles Damage function 1317.
+
+Implementation boundaries
+-------------------------
+Core only writes observed exact damage fields, actual player varHealthMain for
+bounded nonlethal recovery, and native bCanBeDamaged. It never guesses a train HP
+write target, modifies save files directly, edits PAK files, globally clears
+Charles.Can Damage, changes NightmareMode, or suppresses the story guide death.
+
+All UObject work is scheduled on the game thread. Controller/local world/class
+checks and actor references select live targets; menu/default objects are excluded.
+NotifyOnNewObject requests a rescan. BeginPlay and a 50 ms game-thread loop apply
+fields after initialization. A legacy LoopAsync path queues onto the game thread.
+
+Native ApplyDamage/ApplyPointDamage PRE hooks zero BaseDamage only for the bound,
+enabled player or locomotive. They do not modify outgoing damage, preventing
+stacking with the Charles hit multipliers. Standard radial damage is handled only
+by native damageability, not a broad zero-radius-damage hook that could also
+disable player explosions.
+
+Blueprint Damage hooks are POST observers. They log, check for gaps and perform
+bounded nonlethal recovery. They do not cancel the original Blueprint function.
+No unsupported Lua pre-Blueprint API, invented C++ cancellation function, raw
+memory offset or unvalidated bytecode patch is shipped.
+
+Captured per-instance baselines restore on OFF. Failed restorations remain
+pending and retry; HUD says OFF (RESTORING). Old live actors are restored on
+rebind. Each doubled field is compared to the last applied value to avoid
+compounding on poll. A game replacement value is treated as a fresh baseline;
+relative phase scaling of an already patched value remains unverified.
+
+Readback readiness is deliberately separate from enable intent. A detected
+health loss clears readiness for that actor for the session, even if recovered.
+Initial zero health before first positive health is treated as initialization,
+not a permanent breach. Dead/zero-health actors are not resurrected.
+
+Known unresolved requirements
+-----------------------------
+The requested universal player/train invulnerability and 2x damage for every
+weapon, opening event, boss phase and both difficulties are NOT established by
+these offline tests. Direct scripted death, direct HP assignment, and sources
+outside the verified Charles fields may bypass protection. Field application
+after BeginPlay/50 ms polling does not guarantee first-frame protection.
+
+The train's true health storage and its damage function parameter semantics
+still need the expanded live report. Metadata names alone cannot demonstrate
+execution order. UE4SS normally lacks FProperty:GetPropertyFlags in Lua, so the
+collector marks unclassified function fields explicitly rather than presenting
+locals as parameters. Positional event values are logged without invented names.
+
+Do not hot reload this Lua mod. Restart the game between updates so captured
+baselines correspond to a fresh unmodified process. UE4SS OnUnload is not used
+as an assumed safe game-thread restoration point.
+
+Validation performed
+--------------------
+Actual Lua 5.4 loaded/compiled all four production modules. Isolated Lua tests
+exercise controls, state, reflection and property mutation against values from
+the supplied report, plus failure/scene-change cases. Tests include:
+  - plain two-argument RegisterKeyBind calls, actual F6/F7/F8 label changes;
+  - F11 visibility independent of gameplay flags; F9 while hidden;
+  - native target parameter writes and unrelated actors left unchanged;
+  - menu actor exclusion, live world selection and exact class paths;
+  - 2x stability across repeated polls and toggles, baseline restoration;
+  - independent train/player sources and native flags;
+  - transient restoration failure retained/retried;
+  - original unused varHealth remains untouched;
+  - bounded recovery, explicit protection-gap status, no death resurrection;
+  - field 291 and false booleans survive full reflection;
+  - component/struct expansion, explicit limits and exact spaced names;
+  - HUD cleanup on controller/world replacement and failed creation.
+
+Verification scripts are included in Verification/. See VALIDATION_RESULTS.txt
+for the final test execution result. Mocks verify our Lua logic and API wiring;
+they cannot prove the game's Blueprint execution, live UMG rendering, weapon
+damage totals or Nightmare behavior. No in-game test was performed here.
+
+Installer invariants
+--------------------
+Existing UE4SS only. Stages outside Mods; replaces only this mod folder and its
+mods.txt entry. Preserves unrelated entry text/encoding/newlines. Local backups
+and failure rollback retain original mod/config. The log collector has explicit
+bounds and omission manifest; it does not upload saves or other mod folders.
+
+Primary API references
+----------------------
+https://docs.ue4ss.com/lua-api/global-functions/registerhook.html
+https://docs.ue4ss.com/lua-api/global-functions/registerkeybind.html
+https://docs.ue4ss.com/lua-api/global-functions/notifyonnewobject.html
+https://docs.ue4ss.com/lua-api/classes/uobject.html
+https://docs.ue4ss.com/lua-api/classes/ustruct.html
+https://docs.ue4ss.com/lua-api/classes/uscriptstruct.html
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/Mod/LuaMod.cpp
+
+The native C++ pre-script callback exists, but its cancellation-control SDK
+definitions were not available to verify and build faithfully in this workspace.
+No placeholder DLL or claim of a compiled native cancellation plugin is included.

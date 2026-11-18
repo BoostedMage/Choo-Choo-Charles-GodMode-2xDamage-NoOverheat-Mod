@@ -1,0 +1,8 @@
+PASS adjacent: actual install, prior folder replacement, local backups, exact config preservation and injected install rollback
+PASS adjacent: actual collection, complete 4,000-line log, previous/nested sessions, cap manifest, early/late UE4SS matches, save/other-mod/link exclusion
+PASS adjacent: actual uninstall and injected uninstall rollback; UE4SS/settings/other mod/saves unchanged
+PASS subfolder: actual install, prior folder replacement, local backups, exact config preservation and injected install rollback
+PASS subfolder: actual collection, complete 4,000-line log, previous/nested sessions, cap manifest, early/late UE4SS matches, save/other-mod/link exclusion
+PASS subfolder: actual uninstall and injected uninstall rollback; UE4SS/settings/other mod/saves unchanged
+PASS total smoke assertions: 84
+SCOPE: PowerShell 7.4.7 on Linux; fake executable/DLL/payload, temporary game trees only. Test-only overrides stub process detection, force backups into the fixture, and inject optional mods.txt write failures. No Windows or game execution was tested.

@@ -1,0 +1,7 @@
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/core.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/diagnostics.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/hud.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/logger.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/main.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/noheat.lua
+SYNTAX PASS /workspace/scratch/8b5371516b2c/work_v060/Mod/ChooChooCharles_GodMode/Scripts/playerguard.lua

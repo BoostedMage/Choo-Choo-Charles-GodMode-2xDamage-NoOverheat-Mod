@@ -1,0 +1,10 @@
+PASS PowerShell parser: CCC.Tools.ps1
+PASS PowerShell parser: COLLECT_Mod_Test.ps1
+PASS PowerShell parser: INSTALL_God_Mode.ps1
+PASS PowerShell parser: UNINSTALL_Mod.ps1
+PASS actual helper: 12 install/write/idempotence/rollback/uninstall text fixtures
+PASS actual helper: six BOM/encoding variants with Unicode comments and exact-byte rollback
+PASS actual helper: missing file creation/rollback and invalid encoding refusal
+PASS actual helper: shared-read whole-file snapshot and explicit size-cap omission
+PASS total actual PowerShell assertions: 111
+Runtime: PowerShell 7.4.7; Debian GNU/Linux 13 (trixie)

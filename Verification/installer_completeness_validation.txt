@@ -1,0 +1,6 @@
+PASS missing Scripts/native/ccc_guard.dll: rejected before backup/install; old mod, exact mods.txt and existing UE4SS preserved
+PASS missing Scripts/playerguard.lua: rejected before backup/install; old mod, exact mods.txt and existing UE4SS preserved
+PASS missing Scripts/logger.lua: rejected before backup/install; old mod, exact mods.txt and existing UE4SS preserved
+PASS corrupted staged DLL: actual SHA256 comparison rejected installation before installed mutation; staging cleaned; old mod, exact mods.txt and UE4SS preserved
+PASS total completeness assertions: 35
+SCOPE: actual install script with temporary fake game trees and inert executable/DLL files. Test-only overrides stub process detection, keep backups inside the fixture, and corrupt the copied native DLL. No real game installation or game execution is tested.

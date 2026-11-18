@@ -1,0 +1,178 @@
+UE4SS 4.0.0 API review — Choo-Choo Charles
+Reviewed 2026-11-18 against official v4.0.0 source and primary documentation.
+
+1. Lua Blueprint hooks cannot prevent execution
+
+RegisterHook(path, callback [, postCallback]) supports an actual pre callback for
+native UFunctions. For Blueprint script UFunctions, its first callback is POST;
+the optional third argument is ignored. The function must already be loaded.
+Delegate signatures are unsupported. The implementation checks FUNC_Native and
+the ProcessInternal function pointer, not only the /Script/ path spelling.
+
+RegisterCustomEvent also dispatches after the Blueprint body. UE4SS 4.0.0's
+LuaMod.cpp installs its shared script_hook using
+RegisterProcessLocalScriptFunctionPostCallback for UE >= 4.22 (or the older
+ProcessInternalPostCallback for earlier engines). Returning false/0 does not
+cancel the body: a callback return overrides an existing UFunction return value
+after execution. A void death event has no such return to override.
+
+No Lua global named RegisterProcessLocalScriptFunctionPreHook is exposed by the
+reviewed v4.0.0 source. Do not invent that API or describe post-hit healing as
+prevention of a lethal Blueprint event.
+
+Official sources:
+https://docs.ue4ss.com/lua-api/global-functions/registerhook.html
+https://docs.ue4ss.com/lua-api/global-functions/registercustomevent.html
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/Mod/LuaMod.cpp
+Relevant source functions: lua_unreal_script_function_hook_pre/post,
+RegisterHook registration, script_hook, and LuaMod::on_program_start.
+
+2. Native engine damage hooks: supported signatures and limited coverage
+
+These native reflected paths accept a pre callback through RegisterHook:
+  /Script/Engine.GameplayStatics:ApplyDamage
+  /Script/Engine.GameplayStatics:ApplyPointDamage
+  /Script/Engine.GameplayStatics:ApplyRadialDamage
+  /Script/Engine.GameplayStatics:ApplyRadialDamageWithFalloff
+
+Lua callback arguments, including UE4SS's initial Context argument:
+
+ApplyDamage(Context, DamagedActor, BaseDamage, EventInstigator, DamageCauser,
+            DamageTypeClass)
+
+ApplyPointDamage(Context, DamagedActor, BaseDamage, HitFromDirection, HitInfo,
+                 EventInstigator, DamageCauser, DamageTypeClass)
+
+ApplyRadialDamage(Context, WorldContextObject, BaseDamage, Origin, DamageRadius,
+                  DamageTypeClass, IgnoreActors, DamageCauser,
+                  InstigatedByController, bDoFullDamage,
+                  DamagePreventionChannel)
+
+ApplyRadialDamageWithFalloff(Context, WorldContextObject, BaseDamage,
+                             MinimumDamage, Origin, DamageInnerRadius,
+                             DamageOuterRadius, DamageFalloff, DamageTypeClass,
+                             IgnoreActors, DamageCauser,
+                             InstigatedByController, DamagePreventionChannel)
+
+Supported scalar pre-write pattern (isProtectedTarget is the mod's own function):
+
+  RegisterHook("/Script/Engine.GameplayStatics:ApplyDamage",
+      function(Context, DamagedActor, BaseDamage)
+          local target = DamagedActor:get()
+          if target and target:IsValid() and isProtectedTarget(target) then
+              BaseDamage:set(0.0)
+          end
+      end)
+
+ApplyPointDamage has the same first two actual parameters. Read/write hook
+parameters with :get()/:set(); returning 0 alone changes the eventual return
+value and does not suppress side effects.
+
+Radial damage has no individual DamagedActor parameter. For selective protection,
+merge protected actors into IgnoreActors while preserving the existing list.
+Do not zero every explosion globally; that also disables outgoing explosion
+damage. WithFalloff has an additional MinimumDamage parameter. Native parameter
+hooks still require execution in the actual game to establish that its damage
+routes use these functions. A direct custom Blueprint Damage call or direct
+health subtraction can bypass all four. ReceiveAnyDamage is an event responding
+to damage, not proof that every custom damage route uses GameplayStatics.
+
+Official UE4.27 signatures:
+https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/Kismet/UGameplayStatics/ApplyDamage?application_version=4.27
+https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/Kismet/UGameplayStatics/ApplyPointDamage?application_version=4.27
+https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/Kismet/UGameplayStatics/ApplyRadialDamage?application_version=4.27
+https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/Kismet/UGameplayStatics/ApplyRadialDamageWithFalloff?application_version=4.27
+https://www.unrealengine.com/blog/damage-in-ue4
+
+3. Exact property names and live struct access
+
+UObject and UScriptStruct support bracket reads/writes, including names containing
+spaces: actor["Damage to Train"] = 0. Use exact reflected FNames; a display label
+or guessed Health field is insufficient. For an actual struct property:
+
+  local liveStats = actor["Exact Struct Property Name"]
+  if liveStats and liveStats:IsValid() and liveStats:IsMappedToObject() then
+      local current = liveStats["Exact Member FName"]
+  end
+
+FStructProperty:GetStruct() returns schema metadata with no live data address.
+It is suitable for enumerating member names, not accessing an actor's current
+values. Obtain current values from the actor's property itself. User-defined
+struct member FNames may contain generated suffixes; preserve the exact name.
+UScriptStruct:ForEachProperty is present through manually inherited methods.
+GetBaseAddress is deprecated/removed and throws in v4.0.0 despite stale docs.
+
+Only write after successful type-checked reads; verify by reading back. Recheck
+actor validity and reacquire after map/load transitions. Readback verifies a
+field write, not that every gameplay route obeys that field.
+
+Preserve boolean false in protected reads. In Lua, `ok and value or nil` converts
+false into nil. Use `if ok then return value end` instead.
+
+Official sources:
+https://docs.ue4ss.com/lua-api/classes/uobject.html
+https://docs.ue4ss.com/lua-api/classes/uscriptstruct.html
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/LuaType/LuaUScriptStruct.cpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/LuaType/LuaXStructProperty.cpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/LuaType/LuaUObject.cpp
+
+4. Repeating timer return semantics
+
+  local handle = LoopInGameThreadWithDelay(100, function()
+      -- Work; no return is required.
+  end)
+  -- Explicitly stop later: CancelDelayedAction(handle)
+
+v4.0.0 invokes these callbacks with zero expected return values, then reschedules
+looping actions. A nil return does NOT stop the loop. This differs from legacy
+LoopAsync, where returning true stops repetition. EngineTick/ProcessEvent backend
+availability is a separate issue; the new timer attempts a fallback when needed.
+
+Correction to an early research message: LuaMod.cpp contains examples of replacing
+RegisterHook/NotifyOnNewObject with throwing functions in game-thread contexts,
+but those blocks are commented out in v4.0.0. They are not an active restriction.
+
+Official sources:
+https://docs.ue4ss.com/lua-api/global-functions/delayedactions.html
+https://docs.ue4ss.com/upgrade-guide.html
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/UE4SS/src/Mod/LuaMod.cpp
+
+5. C++ pre-hook feasibility and this environment's limit
+
+The official EventViewerMod proves a native pre-hook API exists:
+
+  RC::Unreal::Hook::RegisterProcessLocalScriptFunctionPreCallback
+
+Its callback type is ProcessLocalScriptFunctionCallbackWithData; it receives
+(TCallbackIterationData<void>&, UObject*, FFrame&, void*). Registration takes
+the callback and FCallbackOptions and returns GlobalCallbackId. EventViewer only
+observes calls, returning void; its code does not demonstrate cancellation.
+
+The exact callback-control implementation is in the UEPseudo submodule. The
+v4.0.0 .gitmodules points to Re-UE4SS/UEPseudo; anonymous retrieval is unavailable.
+The official build guide requires an Epic-linked GitHub account with Unreal
+source access. Do not invent cancellation methods, class layouts, or offsets.
+
+The official zDEV-UE4SS_v4.0.0.zip was downloaded and inspected: 586 archive
+members, no .h/.hpp/.lib/.a SDK files. It supplies runtime DLL/PDB and other
+assets, not the missing SDK. No faithful compiled C++ pre-cancellation plugin
+was produced or validated in this work.
+
+Linux itself is not a fundamental obstacle: UE4SS documents cross-compilation
+using clang-cl/lld-link plus xwin Microsoft SDK/CRT, or msvc-wine. A generic g++
+or MinGW/Zig Windows build does not replace the required MSVC-compatible C++
+environment or the unavailable Unreal SDK. Obtaining a compiler alone would
+not establish a safe compatible plugin.
+
+Official sources:
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/cppmods/EventViewerMod/src/Middleware.cpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/cppmods/EventViewerMod/include/Middleware.hpp
+https://github.com/UE4SS-RE/RE-UE4SS/blob/v4.0.0/.gitmodules
+https://docs.ue4ss.com/guides/creating-a-c%2B%2B-mod.html
+https://docs.ue4ss.com/#cross-compiling-windows-binaries-on-linux
+https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v4.0.0
+
+Practical conclusion: exact source-damage fields and native pre parameter writes
+can prevent damage on the routes they govern. Bounded nonlethal health recovery
+can repair surviving hits. Neither proves protection from arbitrary lethal or
+scripted Blueprint events. Keep that limit explicit until tested in the game.
